@@ -6,7 +6,7 @@ This library provides for different implementations of 2D raycasting for 2D occu
 
 ## Building the Code
 
-The following has been tested on Ubuntu 14.04, OSX 10.10, and Ubuntu 16.06. Hopefully it will work on other systems as well, or will at least be not too difficult to fix.
+The following has been tested on Ubuntu 14.04-20.04 and OSX 10.10. Hopefully it will work on other systems as well, or will at least be not too difficult to fix.
 
 ### C++ code
 
@@ -30,8 +30,6 @@ mkdir build
 cd build
 cmake ..
 make
-# 3.6 should be your cmake version number
-sudo ln -s [path to cmake directory]/build/bin/cmake /usr/bin/cmake3.6
 ```
 
 Then use cmake3.6 instead of cmake in the above instructions for building the range_lib code.
@@ -48,19 +46,19 @@ git clone https://github.com/kctess5/range_libc
 cd range_libc_dist/pywrapper
 # for an in place build, do this:
 python setup.py build_ext --inplace
-# for a system wide install, do this:
-python setup.py install
+# system wide installs not recommended, use --user flag
+python setup.py install --user
 # to compile with the GPU kernels, do this:
-WITH_CUDA=ON python setup.py install
+WITH_CUDA=ON python setup.py install --user
 # this should take a few seconds to run
 python test.py
 ```
 
-To see example usage of the Python wrappers (using the ROS specific helpers) see [https://github.com/mit-racecar/particle_filter](https://github.com/mit-racecar/particle_filter). See the [/docs](/docs) folder for documentation.
+To see example usage of the Python wrappers (using the ROS specific helpers) see [https://github.com/f1tenth/particle_filter](https://github.com/f1tenth/particle_filter). See the [/docs](/docs) folder for documentation.
 
-### Building on a RACECAR
+### Building on a Jetson Orin
 
-MIT's 6.141 uses this library for accelerating particle filters onboard the RACECAR platform. To install this on the Jetson TX1, do:
+To install on a Jetson Orin, you will need to install the following dependencies:
 
 ```
 # Copy the code
@@ -69,11 +67,13 @@ cd range_libc
 mkdir build
 cmake ..
 make
-# To build the Python wrappers
-sudo apt-get install Cython
+# To build the Python wrappers, Cython 3.0.12 needed for GPU support
+pip3 install Cython==3.0.12
 cd pywrapper
-sudo WITH_CUDA=ON python setup.py install
+WITH_CUDA=ON python setup.py install --user
 ```
+
+For other Jetson platforms, you may need to change the gcc/g++ versions in setup.py lines 110-123 to match the version of gcc/g++ on your system. You can find the version of gcc/g++ on your system by running `gcc --version` and `g++ --version`. You will also need to update the '-arch' flag in the setup.py file to match the architecture of your Jetson platform. For example, for a Jetson Xavier, you would change the '-arch' flag to 'sm_72'. The flag is on line 99 of the setup.py file.
 
 ## License
 
