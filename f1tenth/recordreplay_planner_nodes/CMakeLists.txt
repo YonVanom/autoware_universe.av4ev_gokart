@@ -4,7 +4,7 @@ project(recordreplay_planner_nodes)
 
 ### Dependencies
 find_package(autoware_cmake REQUIRED)
-find_package(recordreplay_planner_interface REQUIRED)
+find_package(recordreplay_planner_msgs REQUIRED)
 
 autoware_package()
 
@@ -17,7 +17,7 @@ set(NODE_NAME ${RECORDREPLAY_PLANNER_NODE_LIB}_exe)
 
 ament_target_dependencies(recordreplay_planner_node
   rclcpp
-  recordreplay_planner_interface
+  recordreplay_planner_msgs
 )
 
 rclcpp_components_register_node(${RECORDREPLAY_PLANNER_NODE_LIB}

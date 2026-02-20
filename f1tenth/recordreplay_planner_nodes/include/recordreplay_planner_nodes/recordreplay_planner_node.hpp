@@ -20,9 +20,9 @@
 #include <recordreplay_planner/recordreplay_planner.hpp>
 #include <recordreplay_planner_nodes/visibility_control.hpp>
 
-#include <recordreplay_planner_interface/action/record_trajectory.hpp>
-#include <recordreplay_planner_interface/action/replay_trajectory.hpp>
-#include <recordreplay_planner_interface/srv/modify_trajectory.hpp>
+#include <recordreplay_planner_msgs/action/record_trajectory.hpp>
+#include <recordreplay_planner_msgs/action/replay_trajectory.hpp>
+#include <recordreplay_planner_msgs/srv/modify_trajectory.hpp>
 
 #include <autoware_planning_msgs/msg/trajectory.hpp>
 #include <autoware_planning_msgs/msg/trajectory_point.hpp>
@@ -46,11 +46,11 @@ namespace planning
 namespace recordreplay_planner_nodes
 {
 using PlannerPtr = std::unique_ptr<motion::planning::recordreplay_planner::RecordReplayPlanner>;
-using recordreplay_planner_interface::action::RecordTrajectory;
-using recordreplay_planner_interface::action::ReplayTrajectory;
+using recordreplay_planner_msgs::action::RecordTrajectory;
+using recordreplay_planner_msgs::action::ReplayTrajectory;
 using autoware_planning_msgs::msg::Trajectory;
 using autoware_planning_msgs::msg::TrajectoryPoint;
-using recordreplay_planner_interface::srv::ModifyTrajectory;
+using recordreplay_planner_msgs::srv::ModifyTrajectory;
 using State = autoware_planning_msgs::msg::TrajectoryPoint;
 using Transform = geometry_msgs::msg::TransformStamped;
 // using motion::motion_common::Real;
