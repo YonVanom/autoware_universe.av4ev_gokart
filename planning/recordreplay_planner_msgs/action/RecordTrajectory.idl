@@ -1,4 +1,4 @@
-module recordreplay_planner_interface {
+module recordreplay_planner_msgs {
   module action {
     struct RecordTrajectory_Goal {
       @verbatim(language = "comment", text =

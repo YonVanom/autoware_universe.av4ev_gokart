@@ -1,6 +1,6 @@
 #include "autoware_planning_msgs/msg/Trajectory.idl"
 
-module recordreplay_planner_interface {
+module recordreplay_planner_msgs {
   module srv {
     struct ModifyTrajectory_Request
     {
