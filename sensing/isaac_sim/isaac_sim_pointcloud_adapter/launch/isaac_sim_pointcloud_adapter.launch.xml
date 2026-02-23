@@ -1,0 +1,9 @@
+<launch>
+  <arg name="input_topic" description="input topic name"/>
+  <arg name="output_topic" description="output topic name"/>
+
+  <node pkg="isaac_sim_pointcloud_adapter" exec="isaac_sim_pointcloud_adapter_node" name="isaac_sim_pointcloud_adapter_node" output="screen">
+    <remap from="input_topic" to="$(var input_topic)"/>
+    <remap from="output_topic" to="$(var output_topic)"/>
+  </node>
+</launch>
