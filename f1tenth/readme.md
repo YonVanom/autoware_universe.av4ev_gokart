@@ -1,22 +1,27 @@
-# Autoware Installation on Jetson Orin Nano and F1tenth Record-Replay Demo
+# Autoware Installation on Jetson Orin Nano (Super) and F1tenth Record-Replay Demo
 
-This tutorial provides step-by-step instructions for installing and setting up the Autoware development environment on the F1tenth car. The Autoware installation process in this branch is modified from the main one to adapt to the Jetson Orin Nano hardware and software systems. This F1tenth branch supports `JetPack 6` on `Ubuntu 22.04`. It runs `ROS2 humble` on an slightly modified version of Autoware's release/2024.06 branch (f1tenth_humble branch). The original [Autoware installation documentation](https://autowarefoundation.github.io/autoware-documentation/main/installation/autoware/source-installation/) from main branch, and the [F1tenth build documentation](https://f1tenth.readthedocs.io/en/foxy_test/index.html)(running ROS2 foxy) are here for your reference.
+This tutorial provides step-by-step instructions for installing and setting up the Autoware development environment on the RoboRacer car. The Autoware installation process in this branch is modified from the main one to adapt to the Jetson Orin Nano (Super) hardware and software systems. 
 
-This repo also includes a F1tenth Record-Replay demo. This demo allows the user to first build a map, record a trajectory by manually driving the F1tenth car, and then perform trajectory following in the `F1tenth gym simulator` or in `real-world` running Autoware framework. Instructions for installing the F1tenth gym simulator are provided. The approximate time investments listed are based on running Jetson Orin Nano on the default`15W` power mode.
+This guide assumes you are using `JetPack 6.2.1` on `Ubuntu 22.04` and will run `Autoware 1.5.0` on `ROS2 humble`.
 
-## Flash JetPack6 to Jetson Orin Nano
+The original [Autoware installation documentation](https://autowarefoundation.github.io/autoware-documentation/main/installation/autoware/source-installation/) from main branch, and the [F1tenth build documentation](https://f1tenth.readthedocs.io/en/foxy_test/index.html)(running ROS2 foxy) are here for your reference.
+
+The approximate time investments listed are based on running Jetson Orin Nano (Super) on the `MAXN SUPER` power mode.
+
+## Flash JetPack 6.2.1 to Jetson Orin Nano (Super)
 (Approximate time investment: 1-1.5 hours)
 
-There are multiple ways to install JetPack on a Jetson as described in [Jetpack 6 Documentation](https://developer.nvidia.com/embedded/jetpack-sdk-60). The recommended ways to install are via the `NVIDIA SDK Manager Method` or the `SD Card Image Method`. This repo was tested on JetPack 6. Other JetPack versions may also work but have not yet been tested.
+There are multiple ways to install JetPack on a Jetson as described in [Jetpack 6.2.1 Documentation](https://developer.nvidia.com/embedded/jetpack-sdk-621). The recommended ways to install are via the `NVIDIA SDK Manager Method` or the `SD Card Image Method`. This guide was tested using JetPack 6.2.1. Other JetPack versions may also work but have not yet been tested.
 
 ### NVIDIA SDK Manager Method:
 This method requires a Linux host computer running Ubuntu Linux x64 version `22.04` with `~40GB` of disk space
 
-This method you will first install `NVIDIA SDK Manager` on your host machine, connect the host machine to the Jetson Orin Nano via a `USB-C` cable, download all of the necessary JetPack components using the SDK Manager, and then flash the JetPack to the target Jetson Orin Nano. This method allows you to directly flash the JetPack to the `SD Card` or to the `NVME SSD drive` on the F1tenth car's Jetson. You may need to create an NVIDIA account to download the NVIDIA SDK manager.
+For this method, you will first install `NVIDIA SDK Manager` on your host machine, connect the host machine to the Jetson Orin Nano (Super) via a `USB-C` cable, download all of the necessary JetPack components using the SDK Manager, and then flash the JetPack to the target Jetson Orin Nano (Super). This method allows you to directly flash the JetPack to the `SD Card` or to the `NVME SSD drive` on the RoboRacer car's Jetson. You may need to create an NVIDIA account to download the NVIDIA SDK manager.
 
 1. Download and install [SDK Manager](https://developer.nvidia.com/sdk-manager) on your host machine.
 
-2. Follow the steps at [Install Jetson Software with SDK Manager](https://docs.nvidia.com/sdk-manager/install-with-sdkm-jetson/index.html). Select JetPack version 6. The target hardware will be the Jetson Orin Nano.
+2. Follow the steps at [Install Jetson Software with SDK Manager](https://docs.nvidia.com/sdk-manager/install-with-sdkm-jetson/index.html). Select JetPack version 6.2.1. The target hardware will be the Jetson Orin Nano.
+    Make sure to also select `Jetson SDK Components` for installation. This is not selected by default.
 
 3. If you have trouble flashing the JetPack, you can put the Jetson into `Force Recovery Mode` by using a jumper to connect `PINs #9 and #10` of the connector J50 before powering up the Jetson.
 
@@ -24,72 +29,128 @@ This method you will first install `NVIDIA SDK Manager` on your host machine, co
 ### SD Card Image Method:
 This method requires a computer with Internet connection and the ability to read and write SD cards
 
-1. Download [JetPack 6](https://developer.nvidia.com/downloads/embedded/l4t/r36_release_v3.0/jp60-orin-nano-sd-card-image.zip)
+1. Download [JetPack 6.2.1](https://developer.nvidia.com/downloads/embedded/L4T/r36_Release_v4.4/jp62-r1-orin-nano-sd-card-image.zip)
 
-2. If you have not previously run a JetPack 6 release on your Jetson Orin Nano Developer kit, you must first update its QSPI before using this JetPack 6 SD Card image. See the [SD Card Image Method](https://developer.nvidia.com/embedded/jetpack-sdk-511) section for more information.
+2. If you are using a `Jetson Orin Nano (NOT Super)` Developer kit and have not previously run a JetPack 6 (or later) release, you must first update its firmware before using the JetPack 6.2.1 SD Card image. See the [Update the Firmware [If Needed]](https://developer.nvidia.com/embedded/learn/get-started-jetson-orin-nano-devkit#firmware) section for more information.
+If you are using a `Jetson Orin Nano Super`, the firmware should already be up to date.
 
-2. Follow the steps at [Jetson Orin Nano Developer Kit - Get Started](https://developer.nvidia.com/embedded/learn/get-started-jetson-xavier-nx-devkit#prepare) to write the Jetpack to the microSD card.
+2. Follow the steps in the [Jetson Orin Nano Developer Kit Getting Started Guide](https://developer.nvidia.com/embedded/learn/get-started-jetson-orin-nano-devkit#write) to write the Jetpack image to the microSD card.
 
 3. Insert your microSD card to the Jetson.
 
-Once the JetPack is successfully flashed to the Jetson NX, boot the system and the Ubuntu desktop environment should launch
+Once the JetPack is successfully flashed to the Jetson, boot the system and the Ubuntu desktop environment should launch
 
+
+## Set up Autoware dependencies
+(Approximate time investment: 2-3 hours)
+
+Some of the dependencies required for Autoware can't be or aren't installed automatically. These need to be set up manually.
+1. Start by updating the system en ensuring the Jetpack packages are installed on your Jetson. This will install, among others, CUDA, CUDNN and TensorRT, which are required by Autoware.
+
+    ```bash
+    sudo apt update && sudo apt upgrade -y
+    sudo apt install -y nvidia-jetpack
+    sudo reboot
+    ```
+
+2. The version of OpenCV provided by NVidia does not contain all the functions required by Autoware. As such, we need to install an Autoware-compatible version. (Originally from [this guide](https://github.com/Ablazesphere/autoware_AGX)) 
+    ```bash
+    sudo apt remove --purge libopencv* opencv* python3-opencv
+
+    sudo apt autoremove -y
+    sudo apt autoclean
+
+    sudo apt update
+
+    sudo apt install -y libopencv-dev=4.5.4+dfsg-9ubuntu4 python3-opencv=4.5.4+dfsg-9ubuntu4
+    ```
+
+3. Autoware requires a specific c++ version of the Spatially Sparse Convolution Library (spconv) and it's dependency the CUda Matrix Multiply (cumm) library. On other systems, these will be installed automatically. On Jetson, these need to be built and installed manually.
+    ```bash
+    git clone -b spconv_v2.3.8+cumm_v0.5.3 https://github.com/autowarefoundation/spconv_cpp
+    cd spconv_cpp
+
+    mkdir -p cumm/build && cd cumm/build && cmake .. && make && cpack -G DEB
+    cd ../../ && sudo apt install ./cumm/_packages/cumm_0.5.3_arm64.deb
+
+    mkdir -p spconv/build && cd spconv/build && cmake .. && make -j $(nproc) && cpack -G DEB
+    cd ../../ && sudo apt install ./spconv/_packages/spconv_2.3.8_arm64.deb
+    ```
 
 ## Set up Autoware development environment 
-(Approximate time investment: 0.5 hour)
+(Approximate time investment: 0.5 hours)
 
-1. Clone the `f1tenth_humble` branch of `autowarefoundation/autoware` and move to the directory.
+1. Clone the latest stable version of Autoware (this guide is known to work with `1.5.0`) of `autowarefoundation/autoware` and move to the directory.
+    ```bash
+    cd ~
+    git clone -b 1.5.0 https://github.com/autowarefoundation/autoware
+    cd autoware
+    ```
+
+2. Before running the setup script, it's `CRITICAL` to disable the agnocast task. Agnocast is currently incompatible with the default Linux Kernel version for the Jetson and will result in a `kernel panic` on next boot. You will need to reflash your Jetson and start over if this happens.
+
+    Open up the Ansible playbook for editing:
+    ```bash
+    sudo apt install nano
+    nano ansible/playbooks/universe.yaml
+    ```
+
+    Then, find and remove the following lines:
+    ```bash
+    - role: autoware.dev_env.agnocast
+        when: rosdistro == 'humble'
+    ```
+
+    To save your changes, press `Ctrl+X` then `Y` and press `Enter`
+
+3. Now, you can use the modified Ansible playbook to install the Autoware dependencies by running the provided setup script. Make sure to include the `--no-nvidia` and `--no-cuda-drivers` flags.
 
    ```bash
-   git clone -b f1tenth_humble https://github.com/autowarefoundation/autoware.git
-   cd autoware
+   ./setup-dev-env.sh --no-nvidia --no-cuda-drivers -y
    ```
 
-2. If you are installing Autoware for the first time, you can automatically install the dependencies by using the provided Ansible script. 
+   The NVIDIA library and cuda driver installation are disabled as they are already installed with the JetPack. If you force the CUDA driver installation here, it can mess up the kernel and cause errors at bootup. You will need to reflash the JetPack if this happens.
 
-   ```bash
-   ./setup-dev-env.sh --no-nvidia --no-cuda-drivers
-   ```
-
-   The NVIDIA library and cuda driver installation are disabled as they are already installed with the JetPack. If you force the cuda driver installation here, it can mess up the kernel and cause errors at bootup. You will need to reflash the JetPack if this happens.
+4. Lastly, make sure the CUDNN and TensorRT CMAKE modules are installed:
+    ```bash
+    sudo apt update 
+    sudo apt install -y ros-humble-cudnn-cmake-module ros-humble-tensorrt-cmake-module
+    ```
 
 
 ## Set up Autoware workspace 
 (Approximate time investment: 3-4 hours)
 
-1. Create the `src` directory and clone repositories into it.
+1. Make sure you are in the previously created autoware directory
+    ```bash
+    cd autoware
+    ```
 
-   autoware uses [vcstool](https://github.com/dirk-thomas/vcstool) to construct workspaces.
+2. Create the `src` directory and clone repositories into it.
+
+   Autoware uses [vcstool](https://github.com/dirk-thomas/vcstool) to construct workspaces.
 
    ```bash
-   cd autoware
    mkdir src
    vcs import src < autoware.repos
    ```
 
-2. Install dependent ROS packages.
+3. Install dependent ROS packages.
 
-   ```bash
-   source /opt/ros/humble/setup.bash
-   rosdep update --include-eol-distros
-   rosdep install -y --from-paths src --ignore-src --rosdistro $ROS_DISTRO -r
-   ```
+    ```bash
+    source /opt/ros/humble/setup.bash
+    sudo apt update && sudo apt upgrade
+    rosdep update
+    rosdep install -y --from-paths src --ignore-src --rosdistro $ROS_DISTRO
+    ```
 
-   Ignore the `Invalid version` errors during rosdep installation
+3. Create swapfile. (Originally from Autoware [troubleshooting section](https://autowarefoundation.github.io/autoware-documentation/main/support/troubleshooting/#build-issues))
 
-3. Create swapfile. Originally from Autoware [troubleshooting section](https://autowarefoundation.github.io/autoware-documentation/main/support/troubleshooting/#build-issues)
-
-   Building Autoware requires a lot of memory. Jetson NX can crash during a build because of insufficient memory. To avoid this problem, 16-32GB of swap should be configured.
+   Building Autoware requires a lot of memory. The Jetson can crash during a build because of insufficient memory. To avoid this problem, 16-32GB of swap should be configured.
 
    Optional: Check the current swapfile
    ```bash
    free -h
-   ```
-
-   Remove the current swapfile
-   ```bash
-   sudo swapoff /swapfile
-   sudo rm /swapfile`
    ```
    
    Create a new swapfile
@@ -105,9 +166,14 @@ Once the JetPack is successfully flashed to the Jetson NX, boot the system and t
    free -h
    ```
 
+   Optional: To make this change permanent
+   ```bash
+   sudo bash -c 'echo "/swapfile swap swap defaults 0 0" >> /etc/fstab'
+   ```
+
 4. Build the workspace.
 
-   autoware uses [colcon](https://github.com/colcon) to build workspaces.
+   Autoware uses [colcon](https://github.com/colcon) to build workspaces.
    For more advanced options, refer to the [documentation](https://colcon.readthedocs.io/).
 
    ```bash
@@ -115,6 +181,7 @@ Once the JetPack is successfully flashed to the Jetson NX, boot the system and t
    ```
 
    Ignore the `stderr` warnings during the build.
+   
    
 
 ## Install f1tenth_gym simulator dependencies
