@@ -80,14 +80,15 @@ Some of the dependencies required for Autoware can't be or aren't installed auto
 ## Set up Autoware development environment 
 (Approximate time investment: 0.5 hours)
 
-1. Clone the latest stable version of Autoware (this guide is known to work with `1.5.0`) of `autowarefoundation/autoware` and move to the directory.
+1. Clone the `roboracer_humble` branch of Autoware (this branch is currently based on version `1.6.0` of `autowarefoundation/autoware`) and move to the directory.
     ```bash
     cd ~
-    git clone -b 1.5.0 https://github.com/autowarefoundation/autoware
+    git clone -b roboracer_humble https://github.com/YonVanom/autoware.av4ev_gokart.git autoware
     cd autoware
     ```
 
-2. Before running the setup script, it's `CRITICAL` to disable the agnocast task. Agnocast is currently incompatible with the default Linux Kernel version for the Jetson and will result in a `kernel panic` on next boot. You will need to reflash your Jetson and start over if this happens.
+2. If you're using the `roboracer_humble` branch, skip to step 3. If you're building a "standard" Autoware version on Jetson, complete the following first:
+Before running the setup script, it's `CRITICAL` to disable the agnocast task. Agnocast is currently incompatible with the default Linux Kernel version for the Jetson and will result in a `kernel panic` on next boot. You will need to reflash your Jetson and start over if this happens.
 
     Open up the Ansible playbook for editing:
     ```bash
