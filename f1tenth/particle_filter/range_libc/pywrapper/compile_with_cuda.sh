@@ -5,4 +5,4 @@
 # update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 8
 # update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 8
 
-sudo WITH_CUDA=ON python3 setup.py install
+WITH_CUDA=ON python3 setup.py install --user
