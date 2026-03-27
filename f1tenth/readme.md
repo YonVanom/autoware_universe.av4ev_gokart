@@ -2,6 +2,8 @@
 
 This tutorial provides step-by-step instructions for installing and setting up the Autoware development environment on the RoboRacer car. The Autoware installation process in this branch is modified from the main one to adapt to the Jetson Orin Nano (Super) hardware and software systems. 
 
+For instructions on manually setting up a development environment for a standard Autoware release on NVIDIA Jetson, see [manual_setup.md](./manual_setup.md).
+
 This guide assumes you are using `JetPack 6.2.1` on `Ubuntu 22.04` and will run `Autoware 1.5.0` on `ROS2 humble`.
 
 The original [Autoware installation documentation](https://autowarefoundation.github.io/autoware-documentation/main/installation/autoware/source-installation/) from main branch, and the [F1tenth build documentation](https://f1tenth.readthedocs.io/en/foxy_test/index.html)(running ROS2 foxy) are here for your reference.
@@ -41,7 +43,7 @@ If you are using a `Jetson Orin Nano Super`, the firmware should already be up t
 Once the JetPack is successfully flashed to the Jetson, boot the system and the Ubuntu desktop environment should launch
 
 
-## Set up Autoware dependencies
+## Set up Autoware development environment 
 (Approximate time investment: 2-3 hours)
 
 Some of the dependencies required for Autoware can't be or aren't installed automatically. These need to be set up manually.
@@ -53,64 +55,20 @@ Some of the dependencies required for Autoware can't be or aren't installed auto
     sudo reboot
     ```
 
-2. The version of OpenCV provided by NVidia does not contain all the functions required by Autoware. As such, we need to install an Autoware-compatible version. (Originally from [this guide](https://github.com/Ablazesphere/autoware_AGX)) 
-    ```bash
-    sudo apt remove --purge libopencv* opencv* python3-opencv
-
-    sudo apt autoremove -y
-    sudo apt autoclean
-
-    sudo apt update
-
-    sudo apt install -y libopencv-dev=4.5.4+dfsg-9ubuntu4 python3-opencv=4.5.4+dfsg-9ubuntu4
-    ```
-
-3. Autoware requires a specific c++ version of the Spatially Sparse Convolution Library (spconv) and it's dependency the CUda Matrix Multiply (cumm) library. On other systems, these will be installed automatically. On Jetson, these need to be built and installed manually.
-    ```bash
-    git clone -b spconv_v2.3.8+cumm_v0.5.3 https://github.com/autowarefoundation/spconv_cpp
-    cd spconv_cpp
-
-    mkdir -p cumm/build && cd cumm/build && cmake .. && make && cpack -G DEB
-    cd ../../ && sudo apt install ./cumm/_packages/cumm_0.5.3_arm64.deb
-
-    mkdir -p spconv/build && cd spconv/build && cmake .. && make -j $(nproc) && cpack -G DEB
-    cd ../../ && sudo apt install ./spconv/_packages/spconv_2.3.8_arm64.deb
-    ```
-
-## Set up Autoware development environment 
-(Approximate time investment: 0.5 hours)
-
-1. Clone the `roboracer_humble` branch of Autoware (this branch is currently based on version `1.6.0` of `autowarefoundation/autoware`) and move to the directory.
+2. Clone the `roboracer_humble` branch of Autoware (this branch is currently based on version `1.6.0` of `autowarefoundation/autoware`) and move to the directory.
     ```bash
     cd ~
     git clone -b roboracer_humble https://github.com/YonVanom/autoware.av4ev_gokart.git autoware
     cd autoware
     ```
 
-2. If you're using the `roboracer_humble` branch, skip to step 3. If you're building a "standard" Autoware version on Jetson, complete the following first:
-Before running the setup script, it's `CRITICAL` to disable the agnocast task. Agnocast is currently incompatible with the default Linux Kernel version for the Jetson and will result in a `kernel panic` on next boot. You will need to reflash your Jetson and start over if this happens.
-
-    Open up the Ansible playbook for editing:
-    ```bash
-    sudo apt install nano
-    nano ansible/playbooks/universe.yaml
-    ```
-
-    Then, find and remove the following lines:
-    ```bash
-    - role: autoware.dev_env.agnocast
-        when: rosdistro == 'humble'
-    ```
-
-    To save your changes, press `Ctrl+X` then `Y` and press `Enter`
-
-3. Now, you can use the modified Ansible playbook to install the Autoware dependencies by running the provided setup script. Make sure to include the `--no-nvidia` and `--no-cuda-drivers` flags.
+3. Now, you can use our modified Ansible playbook to install the Autoware dependencies by running the provided setup script.
 
    ```bash
-   ./setup-dev-env.sh --no-nvidia --no-cuda-drivers -y
+   ./setup-dev-env.sh --jetson
    ```
 
-   The NVIDIA library and cuda driver installation are disabled as they are already installed with the JetPack. If you force the CUDA driver installation here, it can mess up the kernel and cause errors at bootup. You will need to reflash the JetPack if this happens.
+   The --jetson flag implies --no-cuda and --no-nvidia as these are already installed with the JetPack It also installs a compatible version of opencv (instead of the nvidia one), builds spconv and cumm from scratch to ensure they are compatible with the version of cuda on the jetson, and disables the agnocast installation as described in [manual_setup.md](./manual_setup.md).
 
 4. Lastly, make sure the CUDNN and TensorRT CMAKE modules are installed:
     ```bash
