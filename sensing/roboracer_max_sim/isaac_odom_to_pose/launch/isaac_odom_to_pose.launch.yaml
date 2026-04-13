@@ -1,0 +1,25 @@
+launch:
+- arg:
+    name: input_topic
+    default: /ego/odom
+    description: Input nav_msgs/Odometry topic
+- arg:
+    name: output_pose_topic
+    default: /sensing/gnss/pose
+    description: Output geometry_msgs/PoseStamped topic
+- arg:
+    name: output_pose_with_covariance_topic
+    default: /sensing/gnss/pose_with_covariance
+    description: Output geometry_msgs/PoseWithCovarianceStamped topic
+- node:
+    pkg: isaac_odom_to_pose
+    exec: isaac_odom_to_pose_node
+    name: isaac_odom_to_pose_node
+    output: screen
+    param:
+    - name: input_topic
+      value: $(var input_topic)
+    - name: output_pose_topic
+      value: $(var output_pose_topic)
+    - name: output_pose_with_covariance_topic
+      value: $(var output_pose_with_covariance_topic)
