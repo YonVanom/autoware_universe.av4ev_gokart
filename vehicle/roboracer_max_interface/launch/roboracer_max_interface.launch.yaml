@@ -1,0 +1,72 @@
+launch:
+- arg:
+    name: control_cmd_topic
+    default: /control/command/control_cmd
+- arg:
+    name: odom_topic
+    default: /ego/odom
+- arg:
+    name: drive_topic
+    default: /ego/drive
+- arg:
+    name: control_mode_topic
+    default: /ego/control_mode
+- arg:
+    name: control_mode_report_topic
+    default: /vehicle/status/control_mode
+- arg:
+    name: steering_status_topic
+    default: /vehicle/status/steering_status
+- arg:
+    name: velocity_status_topic
+    default: /vehicle/status/velocity_status
+- arg:
+    name: steering_report_rate_hz
+    default: "30.0"
+    description: Rate at which the steering status report is published [Hz].
+- arg:
+    name: moving_average_window
+    default: "10"
+    description: Number of odom samples to average for velocity smoothing.
+- arg:
+    name: longitudinal_decimal_places
+    default: "1"
+    description: Decimal places to round filtered longitudinal velocity to. -1 disables rounding.
+- arg:
+    name: lateral_decimal_places
+    default: "2"
+    description: Decimal places to round filtered lateral velocity to. -1 disables rounding.
+- arg:
+    name: heading_rate_decimal_places
+    default: "3"
+    description: Decimal places to round filtered heading rate to. -1 disables rounding.
+- node:
+    pkg: roboracer_max_interface
+    exec: roboracer_max_interface_node
+    name: roboracer_max_interface_node
+    output: screen
+    param:
+      - name: control_cmd_topic
+        value: $(var control_cmd_topic)
+      - name: odom_topic
+        value: $(var odom_topic)
+      - name: drive_topic
+        value: $(var drive_topic)
+      - name: control_mode_topic
+        value: $(var control_mode_topic)
+      - name: control_mode_report_topic
+        value: $(var control_mode_report_topic)
+      - name: steering_status_topic
+        value: $(var steering_status_topic)
+      - name: velocity_status_topic
+        value: $(var velocity_status_topic)
+      - name: steering_report_rate_hz
+        value: $(var steering_report_rate_hz)
+      - name: moving_average_window
+        value: $(var moving_average_window)
+      - name: longitudinal_decimal_places
+        value: $(var longitudinal_decimal_places)
+      - name: lateral_decimal_places
+        value: $(var lateral_decimal_places)
+      - name: heading_rate_decimal_places
+        value: $(var heading_rate_decimal_places)
