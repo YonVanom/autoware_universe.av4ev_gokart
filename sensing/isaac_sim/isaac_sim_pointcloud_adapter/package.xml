@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>isaac_sim_pointcloud_adapter</name>
+  <version>0.0.1</version>
+  <description>This package converts between the pointcloud as published by NVIDIA Isaac Sim and the format expected by Autoware. More specifically: "intensity" is converted from float to uint8_t, "channel_id" is converted from uint32_t to uint16_t and renamed "channel", and "echo_id" is renamed to "return_type".</description>
+  <maintainer email="yonvanom@seas.upenn.edu">Yon Vanommeslaeghe</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>sensor_msgs</depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
