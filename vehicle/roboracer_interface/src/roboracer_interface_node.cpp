@@ -55,6 +55,8 @@ RoboracerInterfaceNode::RoboracerInterfaceNode()
     std::chrono::duration<double>(1.0 / steering_report_rate_hz_);
   steering_report_timer_ = this->create_wall_timer(
     period, std::bind(&RoboracerInterfaceNode::publishSteeringReport, this));
+  velocity_report_timer_ = this->create_wall_timer(
+    period, std::bind(&RoboracerInterfaceNode::publishVelocityReport, this));
 }
 
 double RoboracerInterfaceNode::updateMovingAverage(
@@ -103,22 +105,25 @@ void RoboracerInterfaceNode::onServoPosition(const std_msgs::msg::Float64::Share
 
 void RoboracerInterfaceNode::onOdom(const nav_msgs::msg::Odometry::SharedPtr msg)
 {
-  const double long_vel = maybeRound(
+  current_longitudinal_velocity_ = static_cast<float>(maybeRound(
     updateMovingAverage(long_vel_window_, long_vel_sum_, msg->twist.twist.linear.x),
-    longitudinal_decimal_places_);
-  const double lat_vel = maybeRound(
+    longitudinal_decimal_places_));
+  current_lateral_velocity_ = static_cast<float>(maybeRound(
     updateMovingAverage(lat_vel_window_, lat_vel_sum_, msg->twist.twist.linear.y),
-    lateral_decimal_places_);
-  const double heading_rate = maybeRound(
+    lateral_decimal_places_));
+  current_heading_rate_ = static_cast<float>(maybeRound(
     updateMovingAverage(heading_rate_window_, heading_rate_sum_, msg->twist.twist.angular.z),
-    heading_rate_decimal_places_);
+    heading_rate_decimal_places_));
+}
 
+void RoboracerInterfaceNode::publishVelocityReport()
+{
   autoware_vehicle_msgs::msg::VelocityReport velocity;
-  velocity.header = msg->header;
-  velocity.header.frame_id = "base_link";  // Override frame to match expected value in Autoware
-  velocity.longitudinal_velocity = static_cast<float>(long_vel);
-  velocity.lateral_velocity = static_cast<float>(lat_vel);
-  velocity.heading_rate = static_cast<float>(heading_rate);
+  velocity.header.stamp = this->now();
+  velocity.header.frame_id = "base_link";
+  velocity.longitudinal_velocity = current_longitudinal_velocity_;
+  velocity.lateral_velocity = current_lateral_velocity_;
+  velocity.heading_rate = current_heading_rate_;
   velocity_status_pub_->publish(velocity);
 }
 

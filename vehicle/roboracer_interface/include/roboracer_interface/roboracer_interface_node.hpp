@@ -25,6 +25,7 @@ private:
   void onJoy(const sensor_msgs::msg::Joy::SharedPtr msg);
   void onServoPosition(const std_msgs::msg::Float64::SharedPtr msg);
   void publishSteeringReport();
+  void publishVelocityReport();
 
   // Returns the updated moving average after pushing a new sample.
   double updateMovingAverage(std::deque<double> & window, double & sum, double sample) const;
@@ -37,6 +38,7 @@ private:
   rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_sub_;
   rclcpp::Subscription<std_msgs::msg::Float64>::SharedPtr servo_position_sub_;
   rclcpp::TimerBase::SharedPtr steering_report_timer_;
+  rclcpp::TimerBase::SharedPtr velocity_report_timer_;
 
   rclcpp::Publisher<ackermann_msgs::msg::AckermannDriveStamped>::SharedPtr drive_pub_;
   rclcpp::Publisher<autoware_vehicle_msgs::msg::ControlModeReport>::SharedPtr control_mode_pub_;
@@ -45,6 +47,9 @@ private:
 
   double steering_report_rate_hz_{30.0};
   float current_steering_angle_{0.0F};
+  float current_longitudinal_velocity_{0.0F};
+  float current_lateral_velocity_{0.0F};
+  float current_heading_rate_{0.0F};
 
   int autonomous_button_{6};
   int manual_button_{7};
