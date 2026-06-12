@@ -1,10 +1,10 @@
 #include <cmath>
 #include <memory>
 
-#include "roboracer_max_interface/roboracer_max_interface_node.hpp"
+#include "roboracer_isaac_interface/roboracer_isaac_interface_node.hpp"
 
-RoboracerMaxInterfaceNode::RoboracerMaxInterfaceNode()
-: Node("roboracer_max_interface_node")
+RoboracerIsaacInterfaceNode::RoboracerIsaacInterfaceNode()
+: Node("roboracer_isaac_interface_node")
 {
   using std::placeholders::_1;
 
@@ -21,15 +21,15 @@ RoboracerMaxInterfaceNode::RoboracerMaxInterfaceNode()
 
   control_cmd_sub_ = this->create_subscription<autoware_control_msgs::msg::Control>(
     "control/command/control_cmd", rclcpp::QoS{1},
-    std::bind(&RoboracerMaxInterfaceNode::onControlCmd, this, _1));
+    std::bind(&RoboracerIsaacInterfaceNode::onControlCmd, this, _1));
 
   odom_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
     "ego/odom", rclcpp::QoS{1},
-    std::bind(&RoboracerMaxInterfaceNode::onOdom, this, _1));
+    std::bind(&RoboracerIsaacInterfaceNode::onOdom, this, _1));
 
   control_mode_sub_ = this->create_subscription<std_msgs::msg::Int32>(
     "ego/control_mode", rclcpp::QoS{1},
-    std::bind(&RoboracerMaxInterfaceNode::onControlMode, this, _1));
+    std::bind(&RoboracerIsaacInterfaceNode::onControlMode, this, _1));
 
   drive_pub_ = this->create_publisher<ackermann_msgs::msg::AckermannDriveStamped>(
     "ego/drive", rclcpp::QoS{1});
@@ -46,10 +46,10 @@ RoboracerMaxInterfaceNode::RoboracerMaxInterfaceNode()
   const auto period =
     std::chrono::duration<double>(1.0 / steering_report_rate_hz_);
   steering_report_timer_ = this->create_wall_timer(
-    period, std::bind(&RoboracerMaxInterfaceNode::publishSteeringReport, this));
+    period, std::bind(&RoboracerIsaacInterfaceNode::publishSteeringReport, this));
 }
 
-double RoboracerMaxInterfaceNode::updateMovingAverage(
+double RoboracerIsaacInterfaceNode::updateMovingAverage(
   std::deque<double> & window, double & sum, double sample) const
 {
   sum += sample;
@@ -61,7 +61,7 @@ double RoboracerMaxInterfaceNode::updateMovingAverage(
   return sum / static_cast<double>(window.size());
 }
 
-double RoboracerMaxInterfaceNode::maybeRound(double value, int decimal_places)
+double RoboracerIsaacInterfaceNode::maybeRound(double value, int decimal_places)
 {
   if (decimal_places < 0) {
     return value;
@@ -70,7 +70,7 @@ double RoboracerMaxInterfaceNode::maybeRound(double value, int decimal_places)
   return std::round(value * scale) / scale;
 }
 
-void RoboracerMaxInterfaceNode::onControlCmd(
+void RoboracerIsaacInterfaceNode::onControlCmd(
   const autoware_control_msgs::msg::Control::SharedPtr msg)
 {
   current_steering_angle_ = msg->lateral.steering_tire_angle;
@@ -82,7 +82,7 @@ void RoboracerMaxInterfaceNode::onControlCmd(
   drive_pub_->publish(drive);
 }
 
-void RoboracerMaxInterfaceNode::publishSteeringReport()
+void RoboracerIsaacInterfaceNode::publishSteeringReport()
 {
   autoware_vehicle_msgs::msg::SteeringReport steering;
   steering.stamp = this->now();
@@ -90,7 +90,7 @@ void RoboracerMaxInterfaceNode::publishSteeringReport()
   steering_status_pub_->publish(steering);
 }
 
-void RoboracerMaxInterfaceNode::onOdom(const nav_msgs::msg::Odometry::SharedPtr msg)
+void RoboracerIsaacInterfaceNode::onOdom(const nav_msgs::msg::Odometry::SharedPtr msg)
 {
   const double long_vel = maybeRound(
     updateMovingAverage(long_vel_window_, long_vel_sum_, msg->twist.twist.linear.x),
@@ -111,7 +111,7 @@ void RoboracerMaxInterfaceNode::onOdom(const nav_msgs::msg::Odometry::SharedPtr 
   velocity_status_pub_->publish(velocity);
 }
 
-void RoboracerMaxInterfaceNode::onControlMode(const std_msgs::msg::Int32::SharedPtr msg)
+void RoboracerIsaacInterfaceNode::onControlMode(const std_msgs::msg::Int32::SharedPtr msg)
 {
   autoware_vehicle_msgs::msg::ControlModeReport out;
   out.stamp = this->now();
@@ -124,7 +124,7 @@ void RoboracerMaxInterfaceNode::onControlMode(const std_msgs::msg::Int32::Shared
 int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<RoboracerMaxInterfaceNode>());
+  rclcpp::spin(std::make_shared<RoboracerIsaacInterfaceNode>());
   rclcpp::shutdown();
   return 0;
 }

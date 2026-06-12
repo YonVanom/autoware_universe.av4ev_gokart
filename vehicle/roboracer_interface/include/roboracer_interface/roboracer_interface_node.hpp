@@ -1,5 +1,5 @@
-#ifndef ROBORACER_MAX_INTERFACE__ROBORACER_MAX_INTERFACE_NODE_HPP_
-#define ROBORACER_MAX_INTERFACE__ROBORACER_MAX_INTERFACE_NODE_HPP_
+#ifndef ROBORACER_INTERFACE__ROBORACER_INTERFACE_NODE_HPP_
+#define ROBORACER_INTERFACE__ROBORACER_INTERFACE_NODE_HPP_
 
 #include <deque>
 #include <string>
@@ -9,19 +9,21 @@
 #include "autoware_vehicle_msgs/msg/control_mode_report.hpp"
 #include "autoware_vehicle_msgs/msg/steering_report.hpp"
 #include "autoware_vehicle_msgs/msg/velocity_report.hpp"
-#include "std_msgs/msg/int32.hpp"
+#include "sensor_msgs/msg/joy.hpp"
+#include "std_msgs/msg/float64.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include "rclcpp/rclcpp.hpp"
 
-class RoboracerMaxInterfaceNode : public rclcpp::Node
+class RoboracerInterfaceNode : public rclcpp::Node
 {
 public:
-  RoboracerMaxInterfaceNode();
+  RoboracerInterfaceNode();
 
 private:
   void onControlCmd(const autoware_control_msgs::msg::Control::SharedPtr msg);
   void onOdom(const nav_msgs::msg::Odometry::SharedPtr msg);
-  void onControlMode(const std_msgs::msg::Int32::SharedPtr msg);
+  void onJoy(const sensor_msgs::msg::Joy::SharedPtr msg);
+  void onServoPosition(const std_msgs::msg::Float64::SharedPtr msg);
   void publishSteeringReport();
 
   // Returns the updated moving average after pushing a new sample.
@@ -32,7 +34,8 @@ private:
 
   rclcpp::Subscription<autoware_control_msgs::msg::Control>::SharedPtr control_cmd_sub_;
   rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_sub_;
-  rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr control_mode_sub_;
+  rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_sub_;
+  rclcpp::Subscription<std_msgs::msg::Float64>::SharedPtr servo_position_sub_;
   rclcpp::TimerBase::SharedPtr steering_report_timer_;
 
   rclcpp::Publisher<ackermann_msgs::msg::AckermannDriveStamped>::SharedPtr drive_pub_;
@@ -42,6 +45,9 @@ private:
 
   double steering_report_rate_hz_{30.0};
   float current_steering_angle_{0.0F};
+
+  int autonomous_button_{6};
+  int manual_button_{7};
 
   int moving_average_window_{10};
   int longitudinal_decimal_places_{1};  // -1 disables rounding
@@ -57,4 +63,4 @@ private:
   double heading_rate_sum_{0.0};
 };
 
-#endif  // ROBORACER_MAX_INTERFACE__ROBORACER_MAX_INTERFACE_NODE_HPP_
+#endif  // ROBORACER_INTERFACE__ROBORACER_INTERFACE_NODE_HPP_

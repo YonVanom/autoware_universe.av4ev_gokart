@@ -9,8 +9,11 @@ launch:
     name: drive_topic
     default: /ego/drive
 - arg:
-    name: control_mode_topic
-    default: /ego/control_mode
+    name: servo_position_topic
+    default: /commands/servo/position
+- arg:
+    name: joy_topic
+    default: /joy
 - arg:
     name: control_mode_report_topic
     default: /vehicle/status/control_mode
@@ -40,10 +43,18 @@ launch:
     name: heading_rate_decimal_places
     default: "3"
     description: Decimal places to round filtered heading rate to. -1 disables rounding.
+- arg:
+    name: autonomous_button
+    default: "6"
+    description: Joy button index that activates AUTONOMOUS mode.
+- arg:
+    name: manual_button
+    default: "7"
+    description: Joy button index that activates MANUAL mode.
 - node:
-    pkg: roboracer_max_interface
-    exec: roboracer_max_interface_node
-    name: roboracer_max_interface_node
+    pkg: roboracer_interface
+    exec: roboracer_interface_node
+    name: roboracer_interface_node
     output: screen
     remap:
       - from: control/command/control_cmd
@@ -52,8 +63,10 @@ launch:
         to: $(var odom_topic)
       - from: ego/drive
         to: $(var drive_topic)
-      - from: ego/control_mode
-        to: $(var control_mode_topic)
+      - from: commands/servo/position
+        to: $(var servo_position_topic)
+      - from: joy
+        to: $(var joy_topic)
       - from: vehicle/status/control_mode
         to: $(var control_mode_report_topic)
       - from: vehicle/status/steering_status
@@ -71,3 +84,7 @@ launch:
         value: $(var lateral_decimal_places)
       - name: heading_rate_decimal_places
         value: $(var heading_rate_decimal_places)
+      - name: autonomous_button
+        value: $(var autonomous_button)
+      - name: manual_button
+        value: $(var manual_button)
