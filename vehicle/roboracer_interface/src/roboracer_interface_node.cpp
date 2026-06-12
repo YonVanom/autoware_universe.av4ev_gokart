@@ -35,9 +35,9 @@ RoboracerInterfaceNode::RoboracerInterfaceNode()
     "joy", rclcpp::QoS{1},
     std::bind(&RoboracerInterfaceNode::onJoy, this, _1));
 
-  servo_position_sub_ = this->create_subscription<std_msgs::msg::Float64>(
-    "commands/servo/position", rclcpp::QoS{1},
-    std::bind(&RoboracerInterfaceNode::onServoPosition, this, _1));
+  ackermann_cmd_sub_ = this->create_subscription<ackermann_msgs::msg::AckermannDriveStamped>(
+    "ackermann_cmd", rclcpp::QoS{1},
+    std::bind(&RoboracerInterfaceNode::onAckermannCmd, this, _1));
 
   drive_pub_ = this->create_publisher<ackermann_msgs::msg::AckermannDriveStamped>(
     "ego/drive", rclcpp::QoS{1});
@@ -98,9 +98,10 @@ void RoboracerInterfaceNode::publishSteeringReport()
   steering_status_pub_->publish(steering);
 }
 
-void RoboracerInterfaceNode::onServoPosition(const std_msgs::msg::Float64::SharedPtr msg)
+void RoboracerInterfaceNode::onAckermannCmd(
+  const ackermann_msgs::msg::AckermannDriveStamped::SharedPtr msg)
 {
-  current_steering_angle_ = static_cast<float>(msg->data);
+  current_steering_angle_ = msg->drive.steering_angle;
 }
 
 void RoboracerInterfaceNode::onOdom(const nav_msgs::msg::Odometry::SharedPtr msg)

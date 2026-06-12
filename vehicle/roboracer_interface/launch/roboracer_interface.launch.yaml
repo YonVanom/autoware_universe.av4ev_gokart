@@ -9,8 +9,8 @@ launch:
     name: drive_topic
     default: /ego/drive
 - arg:
-    name: servo_position_topic
-    default: /commands/servo/position
+    name: ackermann_cmd_topic
+    default: /ackermann_cmd
 - arg:
     name: joy_topic
     default: /joy
@@ -63,8 +63,8 @@ launch:
         to: $(var odom_topic)
       - from: ego/drive
         to: $(var drive_topic)
-      - from: commands/servo/position
-        to: $(var servo_position_topic)
+      - from: ackermann_cmd
+        to: $(var ackermann_cmd_topic)
       - from: joy
         to: $(var joy_topic)
       - from: vehicle/status/control_mode

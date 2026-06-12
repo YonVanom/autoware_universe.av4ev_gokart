@@ -10,7 +10,6 @@
 #include "autoware_vehicle_msgs/msg/steering_report.hpp"
 #include "autoware_vehicle_msgs/msg/velocity_report.hpp"
 #include "sensor_msgs/msg/joy.hpp"
-#include "std_msgs/msg/float64.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include "rclcpp/rclcpp.hpp"
 
@@ -23,7 +22,7 @@ private:
   void onControlCmd(const autoware_control_msgs::msg::Control::SharedPtr msg);
   void onOdom(const nav_msgs::msg::Odometry::SharedPtr msg);
   void onJoy(const sensor_msgs::msg::Joy::SharedPtr msg);
-  void onServoPosition(const std_msgs::msg::Float64::SharedPtr msg);
+  void onAckermannCmd(const ackermann_msgs::msg::AckermannDriveStamped::SharedPtr msg);
   void publishSteeringReport();
   void publishVelocityReport();
 
@@ -36,7 +35,7 @@ private:
   rclcpp::Subscription<autoware_control_msgs::msg::Control>::SharedPtr control_cmd_sub_;
   rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_sub_;
   rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_sub_;
-  rclcpp::Subscription<std_msgs::msg::Float64>::SharedPtr servo_position_sub_;
+  rclcpp::Subscription<ackermann_msgs::msg::AckermannDriveStamped>::SharedPtr ackermann_cmd_sub_;
   rclcpp::TimerBase::SharedPtr steering_report_timer_;
   rclcpp::TimerBase::SharedPtr velocity_report_timer_;
 
