@@ -45,21 +45,22 @@ launch:
     exec: roboracer_max_interface_node
     name: roboracer_max_interface_node
     output: screen
+    remap:
+      - from: control/command/control_cmd
+        to: $(var control_cmd_topic)
+      - from: ego/odom
+        to: $(var odom_topic)
+      - from: ego/drive
+        to: $(var drive_topic)
+      - from: ego/control_mode
+        to: $(var control_mode_topic)
+      - from: vehicle/status/control_mode
+        to: $(var control_mode_report_topic)
+      - from: vehicle/status/steering_status
+        to: $(var steering_status_topic)
+      - from: vehicle/status/velocity_status
+        to: $(var velocity_status_topic)
     param:
-      - name: control_cmd_topic
-        value: $(var control_cmd_topic)
-      - name: odom_topic
-        value: $(var odom_topic)
-      - name: drive_topic
-        value: $(var drive_topic)
-      - name: control_mode_topic
-        value: $(var control_mode_topic)
-      - name: control_mode_report_topic
-        value: $(var control_mode_report_topic)
-      - name: steering_status_topic
-        value: $(var steering_status_topic)
-      - name: velocity_status_topic
-        value: $(var velocity_status_topic)
       - name: steering_report_rate_hz
         value: $(var steering_report_rate_hz)
       - name: moving_average_window

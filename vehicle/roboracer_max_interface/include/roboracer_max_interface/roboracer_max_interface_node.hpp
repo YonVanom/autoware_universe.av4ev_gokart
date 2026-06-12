@@ -40,14 +40,6 @@ private:
   rclcpp::Publisher<autoware_vehicle_msgs::msg::SteeringReport>::SharedPtr steering_status_pub_;
   rclcpp::Publisher<autoware_vehicle_msgs::msg::VelocityReport>::SharedPtr velocity_status_pub_;
 
-  std::string control_cmd_topic_{"/control/command/control_cmd"};
-  std::string odom_topic_{"/ego/odom"};
-  std::string drive_topic_{"/ego/drive"};
-  std::string control_mode_topic_{"/ego/control_mode"};
-  std::string control_mode_report_topic_{"/vehicle/status/control_mode"};
-  std::string steering_status_topic_{"/vehicle/status/steering_status"};
-  std::string velocity_status_topic_{"/vehicle/status/velocity_status"};
-
   double steering_report_rate_hz_{30.0};
   float current_steering_angle_{0.0F};
 

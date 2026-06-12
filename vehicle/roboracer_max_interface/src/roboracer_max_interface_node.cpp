@@ -8,18 +8,6 @@ RoboracerMaxInterfaceNode::RoboracerMaxInterfaceNode()
 {
   using std::placeholders::_1;
 
-  control_cmd_topic_ =
-    this->declare_parameter<std::string>("control_cmd_topic", control_cmd_topic_);
-  odom_topic_ = this->declare_parameter<std::string>("odom_topic", odom_topic_);
-  drive_topic_ = this->declare_parameter<std::string>("drive_topic", drive_topic_);
-  control_mode_topic_ =
-    this->declare_parameter<std::string>("control_mode_topic", control_mode_topic_);
-  control_mode_report_topic_ =
-    this->declare_parameter<std::string>("control_mode_report_topic", control_mode_report_topic_);
-  steering_status_topic_ =
-    this->declare_parameter<std::string>("steering_status_topic", steering_status_topic_);
-  velocity_status_topic_ =
-    this->declare_parameter<std::string>("velocity_status_topic", velocity_status_topic_);
   steering_report_rate_hz_ =
     this->declare_parameter<double>("steering_report_rate_hz", steering_report_rate_hz_);
   moving_average_window_ =
@@ -32,28 +20,28 @@ RoboracerMaxInterfaceNode::RoboracerMaxInterfaceNode()
     this->declare_parameter<int>("heading_rate_decimal_places", heading_rate_decimal_places_);
 
   control_cmd_sub_ = this->create_subscription<autoware_control_msgs::msg::Control>(
-    control_cmd_topic_, rclcpp::QoS{1},
+    "control/command/control_cmd", rclcpp::QoS{1},
     std::bind(&RoboracerMaxInterfaceNode::onControlCmd, this, _1));
 
   odom_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
-    odom_topic_, rclcpp::QoS{1},
+    "ego/odom", rclcpp::QoS{1},
     std::bind(&RoboracerMaxInterfaceNode::onOdom, this, _1));
 
   control_mode_sub_ = this->create_subscription<std_msgs::msg::Int32>(
-    control_mode_topic_, rclcpp::QoS{1},
+    "ego/control_mode", rclcpp::QoS{1},
     std::bind(&RoboracerMaxInterfaceNode::onControlMode, this, _1));
 
   drive_pub_ = this->create_publisher<ackermann_msgs::msg::AckermannDriveStamped>(
-    drive_topic_, rclcpp::QoS{1});
+    "ego/drive", rclcpp::QoS{1});
 
   control_mode_pub_ = this->create_publisher<autoware_vehicle_msgs::msg::ControlModeReport>(
-    control_mode_report_topic_, rclcpp::QoS{1});
+    "vehicle/status/control_mode", rclcpp::QoS{1});
 
   steering_status_pub_ = this->create_publisher<autoware_vehicle_msgs::msg::SteeringReport>(
-    steering_status_topic_, rclcpp::QoS{1});
+    "vehicle/status/steering_status", rclcpp::QoS{1});
 
   velocity_status_pub_ = this->create_publisher<autoware_vehicle_msgs::msg::VelocityReport>(
-    velocity_status_topic_, rclcpp::QoS{1});
+    "vehicle/status/velocity_status", rclcpp::QoS{1});
 
   const auto period =
     std::chrono::duration<double>(1.0 / steering_report_rate_hz_);
