@@ -56,6 +56,24 @@ private:
     pose_with_cov_msg.header.frame_id = "map";
     pose_with_cov_msg.pose = msg->pose;
     pose_with_cov_msg.pose.pose = pose;
+    
+    /*
+    // Zero everything
+    std::fill(
+      pose_with_cov_msg.pose.covariance.begin(),
+      pose_with_cov_msg.pose.covariance.end(),
+      0.0);
+    */
+    // --- Position covariance (meters^2) ---
+    pose_with_cov_msg.pose.covariance[0]  = 0.00002;  // x
+    pose_with_cov_msg.pose.covariance[7]  = 0.00002;  // y
+    pose_with_cov_msg.pose.covariance[14] = 0.00010;  // z
+
+    // --- Orientation covariance (radians^2) ---
+    pose_with_cov_msg.pose.covariance[21] = 0.000005; // roll
+    pose_with_cov_msg.pose.covariance[28] = 0.000005; // pitch
+    pose_with_cov_msg.pose.covariance[35] = 0.00002;  // yaw
+    //*/
     pose_with_cov_pub_->publish(pose_with_cov_msg);
   }
 
