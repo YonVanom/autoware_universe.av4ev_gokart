@@ -12,7 +12,7 @@ def generate_launch_description():
     sim = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
             get_package_share_directory('f1tenth_stack'), 'launch'),
-            '/bringup_launch.py']),
+            '/no_lidar_bringup_launch.py']),
         )
 
     control = IncludeLaunchDescription(
