@@ -1,0 +1,17 @@
+<launch>
+  <arg name="param_path" default="$(find-pkg-share roboracer_circuit_route_planner)/config/circuit_route_planner.param.yaml"/>
+
+  <node_container pkg="rclcpp_components" exec="component_container" name="circuit_route_planner_container" namespace="">
+    <composable_node pkg="roboracer_circuit_route_planner"
+                    plugin="autoware::circuit_route_planner::CircuitRoutePlannerNode"
+                    name="circuit_route_planner" namespace="">
+      <param from="$(var param_path)"/>
+      <remap from="~/input/vector_map" to="/map/vector_map"/>
+      <remap from="~/input/odometry" to="/localization/kinematic_state"/>
+      <!-- Publish directly to the topic the behavior_path_planner subscribes to -->
+      <remap from="~/output/route" to="/planning/mission_planning/route"/>
+      <!-- Publish route state so the adapi routing diagnostic reports OK instead of UNSET -->
+      <remap from="~/output/route_state" to="/planning/route_state"/>
+    </composable_node>
+  </node_container>
+</launch>
