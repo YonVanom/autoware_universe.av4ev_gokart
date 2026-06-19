@@ -41,7 +41,7 @@ joy_teleop:
       type: topic
       interface_type: std_msgs/msg/Int8
       topic_name: /dev/null
-      deadman_buttons: [5]
+      deadman_buttons: [6]
       message_value:
         data:
           value: 0

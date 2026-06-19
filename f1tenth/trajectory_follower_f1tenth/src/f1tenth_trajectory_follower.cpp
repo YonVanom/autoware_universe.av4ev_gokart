@@ -151,8 +151,8 @@ void F1tenthTrajectoryFollower::updateClosest()
   closest_idx_ = findNearestIndex(trajectory_.points, odometry_->pose.pose.position);
   closest_traj_point_ = trajectory_.points.at(closest_idx_);
 
-  constexpr auto lookahead_time = 3.0;
-  constexpr auto min_lookahead = 3.0;
+  constexpr auto lookahead_time = 1.0;
+  constexpr auto min_lookahead = 1.0;
   const auto lookahead = min_lookahead + lookahead_time * std::abs(odometry_->twist.twist.linear.x);
 
   const auto & ego_pos = odometry_->pose.pose.position;

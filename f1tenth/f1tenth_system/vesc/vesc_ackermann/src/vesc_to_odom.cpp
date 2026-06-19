@@ -99,7 +99,7 @@ void VescToOdom::vescStateCallback(const VescStateStamped::SharedPtr state)
   }
 
   // convert to engineering units
-  double current_speed = (-state->state.speed - speed_to_erpm_offset_) / speed_to_erpm_gain_;
+  double current_speed = (  state->state.speed - speed_to_erpm_offset_) / speed_to_erpm_gain_;
   if (std::fabs(current_speed) < 0.05) {
     current_speed = 0.0;
   }
@@ -158,8 +158,7 @@ void VescToOdom::vescStateCallback(const VescStateStamped::SharedPtr state)
   odom.twist.twist.angular.z = current_angular_velocity;
 
   // Velocity uncertainty
-  /** @todo Think about velocity uncertainty */
-
+  
   if (publish_tf_) {
     TransformStamped tf;
     tf.header.frame_id = odom_frame_;
