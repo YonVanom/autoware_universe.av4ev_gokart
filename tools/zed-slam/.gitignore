@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# ROS2 build artifacts
+build/
+install/
+log/
+
+# SVO recordings
+*.svo
+*.svo2
+
+# Area maps
+*.area
+
+# Waypoints
+*.csv
+
+# Misc
+.env
+*.log
+

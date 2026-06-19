@@ -1,0 +1,118 @@
+{
+  "configById": {
+    "3D!1drgsmk": {
+      "cameraState": {
+        "perspective": true,
+        "distance": 16.290124999996607,
+        "phi": 60.00000000000424,
+        "thetaOffset": 60.000000000009955,
+        "targetOffset": [
+          2.1788215799667143,
+          -1.9413738314072917,
+          -1.828575633859271e-15
+        ],
+        "target": [
+          0,
+          0,
+          0
+        ],
+        "targetOrientation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "fovy": 45,
+        "near": 0.5,
+        "far": 5000
+      },
+      "followMode": "follow-pose",
+      "followTf": "map",
+      "fixedFrame": "map",
+      "scene": {},
+      "transforms": {},
+      "topics": {
+        "/zed/path": {
+          "visible": true
+        },
+        "/zed/zed_node/pose": {
+          "visible": true
+        },
+        "/slam_toolbox/graph_visualization": {
+          "visible": false
+        },
+        "/slam_toolbox/scan_visualization": {
+          "visible": false
+        },
+        "/scan": {
+          "visible": true,
+          "colorField": "intensity",
+          "colorMode": "colormap",
+          "colorMap": "turbo"
+        },
+        "/cloud": {
+          "visible": false,
+          "colorField": "intensity",
+          "colorMode": "colormap",
+          "colorMap": "turbo"
+        },
+        "/map": {
+          "visible": true
+        }
+      },
+      "layers": {
+        "grid": {
+          "visible": true,
+          "drawBehind": false,
+          "instanceId": "34fc4206-75a4-4006-bf5c-94de43d2441b",
+          "layerId": "foxglove.Grid",
+          "size": 10,
+          "divisions": 10,
+          "lineWidth": 1,
+          "color": "#248eff",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "publish": {
+        "type": "point",
+        "poseTopic": "/move_base_simple/goal",
+        "pointTopic": "/clicked_point",
+        "poseEstimateTopic": "/initialpose",
+        "poseEstimateXDeviation": 0.5,
+        "poseEstimateYDeviation": 0.5,
+        "poseEstimateThetaDeviation": 0.26179939
+      },
+      "synchronize": false,
+      "imageMode": {},
+      "foxglovePanelTitle": ""
+    }
+  },
+  "layout": "3D!1drgsmk",
+  "globalVariables": {},
+  "playbackConfig": {
+    "speed": 1
+  },
+  "userNodes": {
+    "887d3063-1cd7-4e3e-9d50-232416e6cedb": {
+      "sourceCode": "let lastStampSec: number | undefined;\n\nexport const inputs = [\"/zed/zed_node/pose\"];\nexport const output = \"/zed_pose_hz\";\n\ntype Output = { hz: number };\n\nexport default function script(event: { message: any }): Output {\n  const stamp = event.message.header.stamp;\n  const currentTime = stamp.sec + stamp.nsec / 1e9;\n\n  let hz = 0;\n  if (lastStampSec !== undefined) {\n    const dt = currentTime - lastStampSec;\n    hz = (dt > 0 && dt < 1) ? 1.0 / dt : 0;\n  }\n  lastStampSec = currentTime;\n\n  return { hz };\n}",
+      "name": "pose_hz"
+    },
+    "2bb1e662-5e4b-4330-8c0a-84fa3f0cb006": {
+      "sourceCode": "const STATUS_MAP: Record<string, number> = {\n  \"INITIALIZING\": 0,\n  \"KNOWN_MAP\":    1,\n  \"LOOP_CLOSED\":  2,\n  \"MAP_UPDATE\":   3,\n  \"LOST\":         4,\n  \"UNKNOWN\":      -1,\n};\n\nexport const inputs = [\"/zed/spatial_memory_status\"];\nexport const output = \"/zed_mem_status_numeric\";\n\ntype Output = { value: number; label: string };\n\nexport default function script(event: { message: any }): Output {\n  const statusMsg = event.message.status?.[0]?.message ?? \"UNKNOWN\";\n  return {\n    value: STATUS_MAP[statusMsg] ?? -1,\n    label: statusMsg,\n  };\n}",
+      "name": "spatial_map_status"
+    },
+    "f16575e0-b5a5-4863-8e30-f63de7b698dc": {
+      "sourceCode": "export const inputs = [\"/zed/zed_node/pose\"];\nexport const output = \"/zed_rpy\";\n\ntype Output = { roll: number; pitch: number; yaw: number };\n\nexport default function script(event: { message: any }): Output {\n  const { x, y, z, w } = event.message.pose.orientation;\n\n  const roll  = Math.atan2(2*(w*x + y*z), 1 - 2*(x*x + y*y));\n  const pitch = Math.asin(2*(w*y - z*x));\n  const yaw   = Math.atan2(2*(w*z + x*y), 1 - 2*(y*y + z*z));\n\n  const toDeg = (r: number) => r * (180 / Math.PI);\n\n  return {\n    roll:  toDeg(roll),\n    pitch: toDeg(pitch),\n    yaw:   toDeg(yaw),\n  };\n}",
+      "name": "rpy"
+    }
+  }
+}
