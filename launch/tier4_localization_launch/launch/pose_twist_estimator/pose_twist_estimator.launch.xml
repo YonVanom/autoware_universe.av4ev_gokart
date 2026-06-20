@@ -9,7 +9,7 @@
   <arg name="gnss_enabled" default="true" description="gnss availability for initial position estimation"/>
 
   <!-- split string with underscores -->
-  <let name="available_args" value="[\'ndt\',\'yabloc\',\'eagleye\',\'artag\',\'lidar-marker\']"/>
+  <let name="available_args" value="[\'ndt\',\'yabloc\',\'eagleye\',\'artag\',\'lidar-marker\',\'zed\']"/>
   <let name="split_function" value="list(set('$(var pose_source)'.split('_')).intersection($(var available_args)))"/>
   <let name="pose_sources" value="$(eval $(var split_function))"/>
   <let name="multi_localizer_mode" value="$(eval &quot;len($(var pose_sources))> 1&quot;)"/>
@@ -20,6 +20,7 @@
   <let name="use_artag_pose" value="$(eval &quot;'artag' in $(var pose_sources)&quot;)"/>
   <let name="use_lidar_marker_pose" value="$(eval &quot;'lidar-marker' in $(var pose_sources)&quot;)"/>
   <let name="use_eagleye_pose" value="$(eval &quot;'eagleye' in $(var pose_sources)&quot;)"/>
+  <let name="use_zed_pose" value="$(eval &quot;'zed' in $(var pose_sources)&quot;)"/>
   <let name="use_eagleye_twist" value="$(eval &quot;'eagleye' == '$(var twist_source)'&quot;)"/>
   <let name="use_gyro_odom_twist" value="$(eval &quot;'gyro_odom' == '$(var twist_source)'&quot;)"/>
 
@@ -62,6 +63,12 @@
   <group if="$(var use_gyro_odom_twist)">
     <push-ros-namespace namespace="twist_estimator"/>
     <include file="$(find-pkg-share tier4_localization_launch)/launch/pose_twist_estimator/gyro_odometer.launch.xml"/>
+  </group>
+
+  <!-- ZED SLAM Relay (as pose estimator) -->
+  <group if="$(var use_zed_pose)">
+    <node pkg="topic_tools" exec="relay" name="zed_slam_pose_relay"
+          args="/sensing/zed/zed/pose_with_covariance /localization/pose_estimator/pose_with_covariance"/>
   </group>
 
   <!-- Eagleye Launch -->

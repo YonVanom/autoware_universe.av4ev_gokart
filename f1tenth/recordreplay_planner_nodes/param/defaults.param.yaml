@@ -9,5 +9,5 @@
     loop_max_gap_m: 5.0
     skip_first_velocity: False
 
-    vehicle_state: '/ego_racecar/odom'
+    vehicle_state: '/zed/odom'
     planned_trajectory: '/planning/trajectory'

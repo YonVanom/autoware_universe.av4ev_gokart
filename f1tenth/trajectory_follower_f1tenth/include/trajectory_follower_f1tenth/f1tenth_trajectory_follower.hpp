@@ -62,6 +62,8 @@ private:
 
   AutowarePlanningMsgs::Trajectory trajectory_;
   AutowarePlanningMsgs::TrajectoryPoint closest_traj_point_;
+  AutowarePlanningMsgs::TrajectoryPoint lookahead_traj_point_;
+  size_t closest_idx_{0};
 
   Marker marker;
   Marker goal_marker;

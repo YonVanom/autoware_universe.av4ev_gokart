@@ -15,7 +15,6 @@
 #include "trajectory_follower_f1tenth/f1tenth_trajectory_follower.hpp"
 
 #include <autoware/motion_utils/trajectory/trajectory.hpp>
-#include <autoware/universe_utils/geometry/pose_deviation.hpp>
 #include <iostream>
 #include <algorithm>
 
@@ -25,8 +24,6 @@ namespace f1tenth_trajectory_follower
 {
 
 using autoware::motion_utils::findNearestIndex;
-using autoware::universe_utils::calcLateralDeviation;
-using autoware::universe_utils::calcYawDeviation;
 
 F1tenthTrajectoryFollower::F1tenthTrajectoryFollower(const rclcpp::NodeOptions & options)
 : Node("f1tenth_trajectory_follower", options)
@@ -88,8 +85,8 @@ void F1tenthTrajectoryFollower::createTrajectoryMarker(){
     goal_marker.header = header;
     goal_marker.lifetime = rclcpp::Duration::from_nanoseconds(0.03 * 1e9);
 
-    point.x = closest_traj_point_.pose.position.x;
-    point.y = closest_traj_point_.pose.position.y;
+    point.x = lookahead_traj_point_.pose.position.x;
+    point.y = lookahead_traj_point_.pose.position.y;
     point.z = 0.0;
     
     goal_marker.points.clear();
@@ -142,8 +139,8 @@ void F1tenthTrajectoryFollower::onTimer()
   cmd.longitudinal.acceleration = static_cast<float>(calcAccCmd());
 
   ackermann_msgs::msg::AckermannDriveStamped ackermann_msg;
-  ackermann_msg.drive.speed = cmd.longitudinal.velocity * 0.2;
-  ackermann_msg.drive.steering_angle = cmd.lateral.steering_tire_angle * 10;
+  ackermann_msg.drive.speed = cmd.longitudinal.velocity;
+  ackermann_msg.drive.steering_angle = cmd.lateral.steering_tire_angle;
   drive_cmd_->publish(ackermann_msg);
 
   cout << "velocity: " << ackermann_msg.drive.speed << "m/s"<< endl;
@@ -151,30 +148,52 @@ void F1tenthTrajectoryFollower::onTimer()
 
 void F1tenthTrajectoryFollower::updateClosest()
 {
-  const auto closest = findNearestIndex(trajectory_.points, odometry_->pose.pose.position);
-  closest_traj_point_ = trajectory_.points.at(closest);
+  closest_idx_ = findNearestIndex(trajectory_.points, odometry_->pose.pose.position);
+  closest_traj_point_ = trajectory_.points.at(closest_idx_);
+
+  constexpr auto lookahead_time = 1.0;
+  constexpr auto min_lookahead = 1.0;
+  const auto lookahead = min_lookahead + lookahead_time * std::abs(odometry_->twist.twist.linear.x);
+
+  const auto & ego_pos = odometry_->pose.pose.position;
+  size_t lookahead_idx = closest_idx_;
+  for (size_t i = closest_idx_; i < trajectory_.points.size(); ++i) {
+    const auto dx = trajectory_.points[i].pose.position.x - ego_pos.x;
+    const auto dy = trajectory_.points[i].pose.position.y - ego_pos.y;
+    if (std::sqrt(dx * dx + dy * dy) >= lookahead) {
+      lookahead_idx = i;
+      break;
+    }
+    lookahead_idx = i;
+  }
+  lookahead_traj_point_ = trajectory_.points.at(lookahead_idx);
 }
 
 double F1tenthTrajectoryFollower::calcSteerCmd()
 {
-  const auto lat_err =
-    calcLateralDeviation(closest_traj_point_.pose, odometry_->pose.pose.position) -
-    lateral_deviation_;
-  const auto yaw_err = calcYawDeviation(closest_traj_point_.pose, odometry_->pose.pose);
-
-  // linearized pure_pursuit control
-  constexpr auto wheel_base = 0.25;
-  constexpr auto lookahead_time = 3.0;
-  constexpr auto min_lookahead = 3.0;
-  const auto lookahead = min_lookahead + lookahead_time * std::abs(odometry_->twist.twist.linear.x);
-  const auto kp = 25.0 * wheel_base / (lookahead * lookahead);
-  const auto kd = 5.0 * wheel_base / lookahead;
-
+  constexpr auto wheel_base = 0.325;
   constexpr auto steer_lim = 1.0;
 
-  const auto steer = std::clamp(-kp * lat_err - kd * yaw_err, -steer_lim, steer_lim);
-  
-  return steer;
+  // Extract ego yaw from quaternion
+  const auto & ego_pos = odometry_->pose.pose.position;
+  const auto & q = odometry_->pose.pose.orientation;
+  const auto ego_yaw = std::atan2(
+    2.0 * (q.w * q.z + q.x * q.y),
+    1.0 - 2.0 * (q.y * q.y + q.z * q.z));
+
+  // Transform lookahead point from map frame into vehicle frame
+  const auto dx = lookahead_traj_point_.pose.position.x - ego_pos.x;
+  const auto dy = lookahead_traj_point_.pose.position.y - ego_pos.y;
+  const auto x_veh =  std::cos(ego_yaw) * dx + std::sin(ego_yaw) * dy;
+  const auto y_veh = -std::sin(ego_yaw) * dx + std::cos(ego_yaw) * dy + lateral_deviation_;
+
+  // Geometric pure pursuit: steer = atan(2L * sin(alpha) / ld)
+  // sin(alpha) = y_veh / ld  =>  steer = atan2(2L * y_veh, ld^2)
+  const auto ld_sq = x_veh * x_veh + y_veh * y_veh;
+  if (ld_sq < 1e-6) return 0.0;
+
+  const auto steer = std::atan2(2.0 * wheel_base * y_veh, ld_sq);
+  return std::clamp(steer, -steer_lim, steer_lim);
 }
 
 double F1tenthTrajectoryFollower::calcAccCmd()

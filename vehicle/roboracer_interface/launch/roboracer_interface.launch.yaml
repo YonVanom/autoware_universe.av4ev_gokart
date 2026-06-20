@@ -9,8 +9,11 @@ launch:
     name: drive_topic
     default: /ego/drive
 - arg:
-    name: control_mode_topic
-    default: /ego/control_mode
+    name: ackermann_cmd_topic
+    default: /ackermann_cmd
+- arg:
+    name: joy_topic
+    default: /joy
 - arg:
     name: control_mode_report_topic
     default: /vehicle/status/control_mode
@@ -40,26 +43,37 @@ launch:
     name: heading_rate_decimal_places
     default: "3"
     description: Decimal places to round filtered heading rate to. -1 disables rounding.
+- arg:
+    name: autonomous_button
+    default: "6"
+    description: Joy button index that activates AUTONOMOUS mode.
+- arg:
+    name: manual_button
+    default: "7"
+    description: Joy button index that activates MANUAL mode.
 - node:
-    pkg: roboracer_max_interface
-    exec: roboracer_max_interface_node
-    name: roboracer_max_interface_node
+    pkg: roboracer_interface
+    exec: roboracer_interface_node
+    name: roboracer_interface_node
     output: screen
+    remap:
+      - from: control/command/control_cmd
+        to: $(var control_cmd_topic)
+      - from: ego/odom
+        to: $(var odom_topic)
+      - from: ego/drive
+        to: $(var drive_topic)
+      - from: ackermann_cmd
+        to: $(var ackermann_cmd_topic)
+      - from: joy
+        to: $(var joy_topic)
+      - from: vehicle/status/control_mode
+        to: $(var control_mode_report_topic)
+      - from: vehicle/status/steering_status
+        to: $(var steering_status_topic)
+      - from: vehicle/status/velocity_status
+        to: $(var velocity_status_topic)
     param:
-      - name: control_cmd_topic
-        value: $(var control_cmd_topic)
-      - name: odom_topic
-        value: $(var odom_topic)
-      - name: drive_topic
-        value: $(var drive_topic)
-      - name: control_mode_topic
-        value: $(var control_mode_topic)
-      - name: control_mode_report_topic
-        value: $(var control_mode_report_topic)
-      - name: steering_status_topic
-        value: $(var steering_status_topic)
-      - name: velocity_status_topic
-        value: $(var velocity_status_topic)
       - name: steering_report_rate_hz
         value: $(var steering_report_rate_hz)
       - name: moving_average_window
@@ -70,3 +84,7 @@ launch:
         value: $(var lateral_decimal_places)
       - name: heading_rate_decimal_places
         value: $(var heading_rate_decimal_places)
+      - name: autonomous_button
+        value: $(var autonomous_button)
+      - name: manual_button
+        value: $(var manual_button)
